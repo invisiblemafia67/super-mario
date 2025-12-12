@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jujutsu Kaisen Fighting Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: white;
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.5em;
+            color: #ff6b6b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .game-area {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 30%, #228B22 30%, #228B22 100%);
+            overflow: hidden;
+        }
+
+        .character {
+            position: absolute;
+            width: 80px;
+            height: 120px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .player {
+            bottom: 50px;
+            left: 100px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            border: 3px solid #fff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .enemy {
+            bottom: 50px;
+            right: 100px;
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            border: 3px solid #fff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .health-bar {
+            position: absolute;
+            top: 80px;
+            width: 300px;
+            height: 20px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .player-health {
+            left: 50px;
+        }
+
+        .enemy-health {
+            right: 50px;
+        }
+
+        .health-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 8px;
+        }
+
+        .player-health-fill {
+            background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
+            width: 100%;
+        }
+
+        .enemy-health-fill {
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            width: 100%;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .attack-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+        }
+
+        .special-btn {
+            background: linear-gradient(45deg, #ffd93d, #ffed4e);
+            color: #333;
+        }
+
+        .defend-btn {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .attack-effect {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ffff00, #ff6b6b);
+            border-radius: 50%;
+            animation: attackAnimation 0.5s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes attackAnimation {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .special-effect {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #ffd93d, #ff6b6b, #6c5ce7);
+            border-radius: 50%;
+            animation: specialAnimation 1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes specialAnimation {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .damage-text {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            animation: damageAnimation 1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes damageAnimation {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+
+        .character-info {
+            position: absolute;
+            top: 120px;
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .player-info {
+            left: 50px;
+            color: #ff6b6b;
+        }
+
+        .enemy-info {
+            right: 50px;
+            color: #6c5ce7;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 24px;
+            display: none;
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+            color: white;
+            margin-top: 20px;
+        }
+
+        .character-select {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .character-card {
+            padding: 20px;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+
+        .character-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        }
+
+        .floating-text {
+            position: absolute;
+            font-size: 18px;
+            font-weight: bold;
+            animation: floatAnimation 2s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes floatAnimation {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-80px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="title">⚔️ JUJUTSU KAISEN FIGHTING GAME ⚔️</div>
+        
+        <div class="character-select" id="characterSelect">
+            <h2>Choose Your Fighter!</h2>
+            <div class="character-grid">
+                <div class="character-card" onclick="selectCharacter('Yuji', '#ff6b6b')">
+                    <h3>🥊 Yuji Itadori</h3>
+                    <p>Superhuman Strength</p>
+                </div>
+                <div class="character-card" onclick="selectCharacter('Megumi', '#74b9ff')">
+                    <h3>🐺 Megumi Fushiguro</h3>
+                    <p>Ten Shadows Technique</p>
+                </div>
+                <div class="character-card" onclick="selectCharacter('Nobara', '#fd79a8')">
+                    <h3>🔨 Nobara Kugisaki</h3>
+                    <p>Straw Doll Technique</p>
+                </div>
+                <div class="character-card" onclick="selectCharacter('Gojo', '#00cec9')">
+                    <h3>👁️ Satoru Gojo</h3>
+                    <p>Limitless & Six Eyes</p>
+                </div>
+                <div class="character-card" onclick="selectCharacter('Maki', '#00b894')">
+                    <h3>⚔️ Maki Zenin</h3>
+                    <p>Cursed Tools Master</p>
+                </div>
+                <div class="character-card" onclick="selectCharacter('Toge', '#a29bfe')">
+                    <h3>🗣️ Toge Inumaki</h3>
+                    <p>Cursed Speech</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="health-bar player-health">
+                <div class="health-fill player-health-fill" id="playerHealthFill"></div>
+            </div>
+            <div class="health-bar enemy-health">
+                <div class="health-fill enemy-health-fill" id="enemyHealthFill"></div>
+            </div>
+
+            <div class="character-info player-info" id="playerInfo">
+                Player: Yuji Itadori<br>
+                HP: <span id="playerHP">100</span>/100<br>
+                Special: <span id="playerSpecial">3</span>/3
+            </div>
+            <div class="character-info enemy-info" id="enemyInfo">
+                Enemy: Cursed Spirit<br>
+                HP: <span id="enemyHP">100</span>/100<br>
+                Level: <span id="enemyLevel">1</span>
+            </div>
+
+            <div class="character player" id="player">
+                <div style="font-size: 24px;">🥊</div>
+                <div>YUJI</div>
+            </div>
+            <div class="character enemy" id="enemy">
+                <div style="font-size: 24px;">👹</div>
+                <div>CURSE</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn attack-btn" onclick="playerAttack()">⚔️ Attack</button>
+            <button class="btn special-btn" onclick="playerSpecial()" id="specialBtn">✨ Special (3)</button>
+            <button class="btn defend-btn" onclick="playerDefend()">🛡️ Defend</button>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <h2 id="gameOverText">Game Over!</h2>
+            <p id="gameOverMessage">You have been defeated!</p>
+            <button class="btn restart-btn" onclick="restartGame()">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            playerHP: 100,
+            playerMaxHP: 100,
+            enemyHP: 100,
+            enemyMaxHP: 100,
+            playerSpecial: 3,
+            playerMaxSpecial: 3,
+            enemyLevel: 1,
+            playerDefending: false,
+            playerCharacter: 'Yuji',
+            playerColor: '#ff6b6b',
+            playerEmoji: '🥊',
+            gameActive: false,
+            enemies: [
+                {name: 'Cursed Spirit', emoji: '👹', hp: 100},
+                {name: 'Special Grade', emoji: '💀', hp: 150},
+                {name: 'Finger Bearer', emoji: '👻', hp: 120},
+                {name: 'Mahito', emoji: '🧟', hp: 200},
+                {name: 'Jogo', emoji: '🌋', hp: 180},
+                {name: 'Hanami', emoji: '🌸', hp: 160},
+                {name: 'Sukuna', emoji: '👑', hp: 300}
+            ]
+        };
+
+        function selectCharacter(name, color) {
+            const characters = {
+                'Yuji': {emoji: '🥊', special: 'Black Flash'},
+                'Megumi': {emoji: '🐺', special: 'Divine Dogs'},
+                'Nobara': {emoji: '🔨', special: 'Hairpin'},
+                'Gojo': {emoji: '👁️', special: 'Hollow Purple'},
+                'Maki': {emoji: '⚔️', special: 'Soul Split'},
+                'Toge': {emoji: '🗣️', special: 'Cursed Speech'}
+            };
+
+            gameState.playerCharacter = name;
+            gameState.playerColor = color;
+            gameState.playerEmoji = characters[name].emoji;
+            
+            document.getElementById('characterSelect').style.display = 'none';
+            document.getElementById('player').style.background = `linear-gradient(45deg, ${color}, ${color}aa)`;
+            document.getElementById('player').innerHTML = `
+                <div style="font-size: 24px;">${characters[name].emoji}</div>
+                <div>${name.toUpperCase()}</div>
+            `;
+            
+            gameState.gameActive = true;
+            updateUI();
+            spawnEnemy();
+        }
+
+        function spawnEnemy() {
+            const enemy = gameState.enemies[Math.min(gameState.enemyLevel - 1, gameState.enemies.length - 1)];
+            gameState.enemyHP = enemy.hp;
+            gameState.enemyMaxHP = enemy.hp;
+            
+            document.getElementById('enemy').innerHTML = `
+                <div style="font-size: 24px;">${enemy.emoji}</div>
+                <div>${enemy.name.toUpperCase()}</div>
+            `;
+            
+            updateUI();
+        }
+
+        function playerAttack() {
+            if (!gameState.gameActive) return;
+            
+            const damage = Math.floor(Math.random() * 25) + 15;
+            gameState.enemyHP = Math.max(0, gameState.enemyHP - damage);
+            
+            createAttackEffect(document.getElementById('enemy'));
+            showDamageText(damage, document.getElementById('enemy'));
+            showFloatingText('💥 Hit!', document.getElementById('player'));
+            
+            if (gameState.enemyHP <= 0) {
+                enemyDefeated();
+                return;
+            }
+            
+            updateUI();
+            setTimeout(enemyTurn, 1000);
+        }
+
+        function playerSpecial() {
+            if (!gameState.gameActive || gameState.playerSpecial <= 0) return;
+            
+            gameState.playerSpecial--;
+            const damage = Math.floor(Math.random() * 40) + 30;
+            gameState.enemyHP = Math.max(0, gameState.enemyHP - damage);
+            
+            createSpecialEffect(document.getElementById('enemy'));
+            showDamageText(damage, document.getElementById('enemy'), '#ffd93d');
+            showFloatingText('✨ SPECIAL!', document.getElementById('player'));
+            
+            if (gameState.enemyHP <= 0) {
+                enemyDefeated();
+                return;
+            }
+            
+            updateUI();
+            setTimeout(enemyTurn, 1500);
+        }
+
+        function playerDefend() {
+            if (!gameState.gameActive) return;
+            
+            gameState.playerDefending = true;
+            showFloatingText('🛡️ Defending!', document.getElementById('player'));
+            
+            setTimeout(enemyTurn, 800);
+        }
+
+        function enemyTurn() {
+            if (!gameState.gameActive) return;
+            
+            const actions = ['attack', 'special'];
+            const action = actions[Math.floor(Math.random() * actions.length)];
+            
+            if (action === 'attack') {
+                let damage = Math.floor(Math.random() * 20) + 10 + (gameState.enemyLevel * 2);
+                if (gameState.playerDefending) {
+                    damage = Math.floor(damage * 0.3);
+                    showFloatingText('🛡️ Blocked!', document.getElementById('player'));
+                }
+                
+                gameState.playerHP = Math.max(0, gameState.playerHP - damage);
+                createAttackEffect(document.getElementById('player'));
+                showDamageText(damage, document.getElementById('player'));
+            } else {
+                let damage = Math.floor(Math.random() * 30) + 20 + (gameState.enemyLevel * 3);
+                if (gameState.playerDefending) {
+                    damage = Math.floor(damage * 0.4);
+                    showFloatingText('🛡️ Partially Blocked!', document.getElementById('player'));
+                }
+                
+                gameState.playerHP = Math.max(0, gameState.playerHP - damage);
+                createSpecialEffect(document.getElementById('player'));
+                showDamageText(damage, document.getElementById('player'), '#6c5ce7');
+            }
+            
+            gameState.playerDefending = false;
+            
+            if (gameState.playerHP <= 0) {
+                gameOver();
+                return;
+            }
+            
+            updateUI();
+        }
+
+        function enemyDefeated() {
+            showFloatingText('🎉 VICTORY!', document.getElementById('enemy'));
+            gameState.enemyLevel++;
+            
+            // Heal player slightly
+            gameState.playerHP = Math.min(gameState.playerMaxHP, gameState.playerHP + 20);
+            
+            // Restore one special use
+            gameState.playerSpecial = Math.min(gameState.playerMaxSpecial, gameState.playerSpecial + 1);
+            
+            setTimeout(() => {
+                if (gameState.enemyLevel > gameState.enemies.length) {
+                    // Player won the entire game!
+                    document.getElementById('gameOverText').textContent = '🏆 CHAMPION! 🏆';
+                    document.getElementById('gameOverMessage').textContent = 'You defeated all the cursed spirits!';
+                    document.getElementById('gameOver').style.display = 'block';
+                    gameState.gameActive = false;
+                } else {
+                    spawnEnemy();
+                }
+            }, 2000);
+        }
+
+        function gameOver() {
+            document.getElementById('gameOverText').textContent = '💀 DEFEATED 💀';
+            document.getElementById('gameOverMessage').textContent = `You reached level ${gameState.enemyLevel}!`;
+            document.getElementById('gameOver').style.display = 'block';
+            gameState.gameActive = false;
+        }
+
+        function restartGame() {
+            gameState = {
+                playerHP: 100,
+                playerMaxHP: 100,
+                enemyHP: 100,
+                enemyMaxHP: 100,
+                playerSpecial: 3,
+                playerMaxSpecial: 3,
+                enemyLevel: 1,
+                playerDefending: false,
+                playerCharacter: 'Yuji',
+                playerColor: '#ff6b6b',
+                playerEmoji: '🥊',
+                gameActive: false,
+                enemies: [
+                    {name: 'Cursed Spirit', emoji: '👹', hp: 100},
+                    {name: 'Special Grade', emoji: '💀', hp: 150},
+                    {name: 'Finger Bearer', emoji: '👻', hp: 120},
+                    {name: 'Mahito', emoji: '🧟', hp: 200},
+                    {name: 'Jogo', emoji: '🌋', hp: 180},
+                    {name: 'Hanami', emoji: '🌸', hp: 160},
+                    {name: 'Sukuna', emoji: '👑', hp: 300}
+                ]
+            };
+            
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('characterSelect').style.display = 'block';
+        }
+
+        function updateUI() {
+            document.getElementById('playerHP').textContent = gameState.playerHP;
+            document.getElementById('enemyHP').textContent = gameState.enemyHP;
+            document.getElementById('playerSpecial').textContent = gameState.playerSpecial;
+            document.getElementById('enemyLevel').textContent = gameState.enemyLevel;
+            
+            document.getElementById('playerHealthFill').style.width = 
+                (gameState.playerHP / gameState.playerMaxHP * 100) + '%';
+            document.getElementById('enemyHealthFill').style.width = 
+                (gameState.enemyHP / gameState.enemyMaxHP * 100) + '%';
+            
+            document.getElementById('specialBtn').textContent = `✨ Special (${gameState.playerSpecial})`;
+            document.getElementById('specialBtn').disabled = gameState.playerSpecial <= 0;
+            
+            document.getElementById('playerInfo').innerHTML = `
+                Player: ${gameState.playerCharacter}<br>
+                HP: <span id="playerHP">${gameState.playerHP}</span>/${gameState.playerMaxHP}<br>
+                Special: <span id="playerSpecial">${gameState.playerSpecial}</span>/${gameState.playerMaxSpecial}
+            `;
+            
+            const currentEnemy = gameState.enemies[Math.min(gameState.enemyLevel - 1, gameState.enemies.length - 1)];
+            document.getElementById('enemyInfo').innerHTML = `
+                Enemy: ${currentEnemy.name}<br>
+                HP: <span id="enemyHP">${gameState.enemyHP}</span>/${gameState.enemyMaxHP}<br>
+                Level: <span id="enemyLevel">${gameState.enemyLevel}</span>
+            `;
+        }
+
+        function createAttackEffect(target) {
+            const effect = document.createElement('div');
+            effect.className = 'attack-effect';
+            effect.style.left = (target.offsetLeft + target.offsetWidth/2 - 30) + 'px';
+            effect.style.top = (target.offsetTop + target.offsetHeight/2 - 30) + 'px';
+            document.querySelector('.game-area').appendChild(effect);
+            
+            setTimeout(() => effect.remove(), 500);
+        }
+
+        function createSpecialEffect(target) {
+            const effect = document.createElement('div');
+            effect.className = 'special-effect';
+            effect.style.left = (target.offsetLeft + target.offsetWidth/2 - 50) + 'px';
+            effect.style.top = (target.offsetTop + target.offsetHeight/2 - 50) + 'px';
+            document.querySelector('.game-area').appendChild(effect);
+            
+            setTimeout(() => effect.remove(), 1000);
+        }
+
+        function showDamageText(damage, target, color = '#ff6b6b') {
+            const text = document.createElement('div');
+            text.className = 'damage-text';
+            text.textContent = `-${damage}`;
+            text.style.color = color;
+            text.style.left = (target.offsetLeft + target.offsetWidth/2) + 'px';
+            text.style.top = (target.offsetTop - 10) + 'px';
+            document.querySelector('.game-area').appendChild(text);
+            
+            setTimeout(() => text.remove(), 1000);
+        }
+
+        function showFloatingText(message, target) {
+            const text = document.createElement('div');
+            text.className = 'floating-text';
+            text.textContent = message;
+            text.style.left = (target.offsetLeft + target.offsetWidth/2 - 40) + 'px';
+            text.style.top = (target.offsetTop - 30) + 'px';
+            text.style.color = '#ffd93d';
+            text.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+            document.querySelector('.game-area').appendChild(text);
+            
+            setTimeout(() => text.remove(), 2000);
+        }
+
+        // Initialize the game
+        updateUI();
+    </script>
+</body>
+</html>
+
