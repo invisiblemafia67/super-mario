@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marvel Heroes Arena - Team Battle Game</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/game.css">
+    <link rel="stylesheet" href="styles/ui.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Main Menu -->
+        <div id="mainMenu" class="menu-screen active">
+            <div class="menu-content">
+                <h1 class="game-title">Marvel Heroes Arena</h1>
+                <div class="menu-buttons">
+                    <button id="playBtn" class="menu-btn primary">Play Game</button>
+                    <button id="heroSelectBtn" class="menu-btn">Hero Gallery</button>
+                    <button id="settingsBtn" class="menu-btn">Settings</button>
+                    <button id="helpBtn" class="menu-btn">How to Play</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Selection Screen -->
+        <div id="heroSelect" class="menu-screen">
+            <div class="hero-select-content">
+                <h2>Choose Your Hero</h2>
+                <div class="hero-grid">
+                    <div class="hero-card" data-hero="ironman">
+                        <div class="hero-icon">🤖</div>
+                        <h3>Iron Man</h3>
+                        <p>High-tech armor with repulsors and missiles</p>
+                        <div class="hero-stats">
+                            <span>Health: ★★★☆☆</span>
+                            <span>Damage: ★★★★☆</span>
+                            <span>Speed: ★★★☆☆</span>
+                        </div>
+                    </div>
+                    <div class="hero-card" data-hero="spiderman">
+                        <div class="hero-icon">🕷️</div>
+                        <h3>Spider-Man</h3>
+                        <p>Web-slinging agility and spider sense</p>
+                        <div class="hero-stats">
+                            <span>Health: ★★☆☆☆</span>
+                            <span>Damage: ★★★☆☆</span>
+                            <span>Speed: ★★★★★</span>
+                        </div>
+                    </div>
+                    <div class="hero-card" data-hero="captain-america">
+                        <div class="hero-icon">🛡️</div>
+                        <h3>Captain America</h3>
+                        <p>Shield mastery and tactical leadership</p>
+                        <div class="hero-stats">
+                            <span>Health: ★★★★☆</span>
+                            <span>Damage: ★★★☆☆</span>
+                            <span>Speed: ★★★☆☆</span>
+                        </div>
+                    </div>
+                    <div class="hero-card" data-hero="thor">
+                        <div class="hero-icon">⚡</div>
+                        <h3>Thor</h3>
+                        <p>God of Thunder with Mjolnir</p>
+                        <div class="hero-stats">
+                            <span>Health: ★★★★★</span>
+                            <span>Damage: ★★★★★</span>
+                            <span>Speed: ★★☆☆☆</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-select-buttons">
+                    <button id="confirmHeroBtn" class="menu-btn primary" disabled>Start Battle</button>
+                    <button id="backToMenuBtn" class="menu-btn">Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Canvas and HUD -->
+        <div id="gameScreen" class="game-screen">
+            <canvas id="gameCanvas" width="1200" height="800"></canvas>
+            
+            <!-- HUD Overlay -->
+            <div id="gameHUD" class="hud-overlay">
+                <!-- Top HUD -->
+                <div class="hud-top">
+                    <div class="team-score">
+                        <div class="team-blue">
+                            <span class="team-name">Blue Team</span>
+                            <span class="score" id="blueScore">0</span>
+                        </div>
+                        <div class="objective-timer">
+                            <span id="gameTimer">5:00</span>
+                        </div>
+                        <div class="team-red">
+                            <span class="team-name">Red Team</span>
+                            <span class="score" id="redScore">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom HUD -->
+                <div class="hud-bottom">
+                    <div class="player-info">
+                        <div class="health-bar">
+                            <div class="health-fill" id="healthBar"></div>
+                            <span class="health-text" id="healthText">100/100</span>
+                        </div>
+                        <div class="hero-portrait">
+                            <div class="hero-icon" id="playerHeroIcon">🤖</div>
+                        </div>
+                        <div class="abilities">
+                            <div class="ability" id="ability1">
+                                <span class="ability-key">Q</span>
+                                <div class="ability-cooldown" id="cooldown1"></div>
+                            </div>
+                            <div class="ability" id="ability2">
+                                <span class="ability-key">E</span>
+                                <div class="ability-cooldown" id="cooldown2"></div>
+                            </div>
+                            <div class="ability ultimate" id="ultimate">
+                                <span class="ability-key">R</span>
+                                <div class="ability-cooldown" id="cooldownUlt"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Minimap -->
+                <div class="minimap">
+                    <canvas id="minimapCanvas" width="150" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause Menu -->
+        <div id="pauseMenu" class="menu-screen">
+            <div class="menu-content">
+                <h2>Game Paused</h2>
+                <div class="menu-buttons">
+                    <button id="resumeBtn" class="menu-btn primary">Resume</button>
+                    <button id="restartBtn" class="menu-btn">Restart</button>
+                    <button id="mainMenuBtn" class="menu-btn">Main Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="menu-screen">
+            <div class="menu-content">
+                <h2 id="gameOverTitle">Victory!</h2>
+                <div id="gameOverStats" class="game-stats">
+                    <p>Final Score: <span id="finalScore">Blue 3 - 2 Red</span></p>
+                    <p>Your Performance: <span id="playerStats">5 Eliminations, 2 Deaths</span></p>
+                </div>
+                <div class="menu-buttons">
+                    <button id="playAgainBtn" class="menu-btn primary">Play Again</button>
+                    <button id="changeHeroBtn" class="menu-btn">Change Hero</button>
+                    <button id="exitBtn" class="menu-btn">Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <h2>Loading...</h2>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <p id="loadingText">Initializing game systems...</p>
+        </div>
+    </div>
+
+    <!-- Game Scripts -->
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/audio.js"></script>
+    <script src="scripts/input.js"></script>
+    <script src="scripts/physics.js"></script>
+    <script src="scripts/renderer.js"></script>
+    <script src="scripts/effects.js"></script>
+    <script src="scripts/animations.js"></script>
+    <script src="scripts/abilities.js"></script>
+    <script src="scripts/character.js"></script>
+    <script src="scripts/heroes/ironman.js"></script>
+    <script src="scripts/heroes/spiderman.js"></script>
+    <script src="scripts/heroes/captain-america.js"></script>
+    <script src="scripts/heroes/thor.js"></script>
+    <script src="scripts/ai.js"></script>
+    <script src="scripts/team.js"></script>
+    <script src="scripts/objectives.js"></script>
+    <script src="scripts/gamemode.js"></script>
+    <script src="scripts/ui.js"></script>
+    <script src="scripts/hud.js"></script>
+    <script src="scripts/menus.js"></script>
+    <script src="scripts/game.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+</html>
